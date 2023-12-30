@@ -1,0 +1,34 @@
+﻿# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.require_version ">= 2.4.0"
+
+CONF = {
+    "cpu" => "2",
+    "memory" => "2048",
+    "box" => "ashleykleynhans/jammy64"
+}
+IP="192.168.57."
+COUNT = 3
+
+Vagrant.configure("2") do |config|
+
+    (1..COUNT).each do |i|
+
+      config.vm.define "node-#{i}" do |node|
+        node.vm.network "private_network", ip: "#{IP}#{i+1}"
+        node.vm.box = CONF["box"]
+        node.vm.hostname = "node-#{i}"
+        node.vm.provider "virtualbox" do |vb|
+
+         vb.gui = false
+         vb.cpus = CONF["cpu"]
+         vb.memory = CONF["memory"]
+       end
+
+        config.vm.provision "shell", inline: <<-SHELL
+            echo 'vagrant:1' | sudo chpasswd
+        SHELL
+
+      end
+    end
+end
